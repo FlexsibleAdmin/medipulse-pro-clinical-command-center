@@ -13,6 +13,9 @@ import '@/index.css'
 import { HomePage } from '@/pages/HomePage'
 import { PatientsPage } from '@/pages/PatientsPage'
 import { PatientDetailPage } from '@/pages/PatientDetailPage'
+import { SchedulePage } from '@/pages/SchedulePage'
+import { ReportsPage } from '@/pages/ReportsPage'
+import { SettingsPage } from '@/pages/SettingsPage'
 const router = createBrowserRouter([
   {
     path: "/",
@@ -27,6 +30,21 @@ const router = createBrowserRouter([
   {
     path: "/patients/:id",
     element: <PatientDetailPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/schedule",
+    element: <SchedulePage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/reports",
+    element: <ReportsPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/settings",
+    element: <SettingsPage />,
     errorElement: <RouteErrorBoundary />,
   },
 ]);
