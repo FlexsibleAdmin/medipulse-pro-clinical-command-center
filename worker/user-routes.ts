@@ -2,10 +2,11 @@ import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { UserEntity, ChatBoardEntity, PatientEntity } from "./entities";
 import { ok, bad, notFound, isStr } from './core-utils';
-import type { DashboardStats } from "@shared/types";
+import type { DashboardStats, Patient } from "@shared/types";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/test', (c) => c.json({ success: true, data: { name: 'MediPulse Pro API' }}));
   // --- PATIENTS API ---
+  // LIST
   app.get('/api/patients', async (c) => {
     await PatientEntity.ensureSeed(c.env);
     const cq = c.req.query('cursor');
@@ -13,12 +14,54 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const page = await PatientEntity.list(c.env, cq ?? null, lq ? Math.max(1, (Number(lq) | 0)) : undefined);
     return ok(c, page);
   });
+  // GET SINGLE
   app.get('/api/patients/:id', async (c) => {
     const id = c.req.param('id');
     const entity = new PatientEntity(c.env, id);
     if (!await entity.exists()) return notFound(c, 'Patient not found');
     return ok(c, await entity.getState());
   });
+  // CREATE (Admit Patient)
+  app.post('/api/patients', async (c) => {
+    const body = await c.req.json() as Partial<Patient>;
+    if (!body.name?.trim() || !body.condition?.trim() || !body.roomNumber?.trim()) {
+      return bad(c, 'Name, condition, and room number are required');
+    }
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const newPatient: Patient = {
+      id,
+      name: body.name.trim(),
+      age: Number(body.age) || 0,
+      gender: (body.gender === 'Male' || body.gender === 'Female') ? body.gender : 'Other',
+      condition: body.condition.trim(),
+      status: 'Stable', // Default status on admission
+      roomNumber: body.roomNumber.trim(),
+      admissionDate: now,
+      lastVisit: now,
+      vitals: {
+        // Default stable vitals
+        heartRate: 70 + Math.floor(Math.random() * 10),
+        bloodPressure: "120/80",
+        o2Saturation: 98,
+        temperature: 36.6
+      }
+    };
+    const created = await PatientEntity.create(c.env, newPatient);
+    return ok(c, created);
+  });
+  // UPDATE (Discharge / Update Status)
+  app.patch('/api/patients/:id', async (c) => {
+    const id = c.req.param('id');
+    const updates = await c.req.json() as Partial<Patient>;
+    const entity = new PatientEntity(c.env, id);
+    if (!await entity.exists()) return notFound(c, 'Patient not found');
+    // Prevent ID mutation
+    delete (updates as any).id;
+    await entity.patch(updates);
+    return ok(c, await entity.getState());
+  });
+  // DASHBOARD STATS
   app.get('/api/dashboard/stats', async (c) => {
     // In a real app, this would aggregate from the index or a dedicated stats DO.
     // For this phase, we'll calculate live from the seeded list to ensure consistency.

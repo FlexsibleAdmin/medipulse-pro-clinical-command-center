@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { PatientTable } from '@/components/dashboard/PatientTable';
@@ -11,7 +11,6 @@ import {
   AlertCircle,
   Calendar,
   Clock,
-  Plus,
   Search,
   Filter,
   FileText
@@ -19,34 +18,35 @@ import {
 import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api-client';
 import type { Patient, DashboardStats } from '@shared/types';
+import { AdmitPatientDialog } from '@/components/patient/AdmitPatientDialog';
 export function HomePage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const [statsData, patientsData] = await Promise.all([
-          api<DashboardStats>('/api/dashboard/stats'),
-          api<{ items: Patient[] }>('/api/patients')
-        ]);
-        setStats(statsData);
-        setPatients(patientsData.items);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to fetch dashboard data:', err);
-        setError('Failed to load dashboard data. Please try again.');
-        toast.error('Connection Error', {
-          description: 'Could not connect to the medical database.'
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
+  const fetchData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const [statsData, patientsData] = await Promise.all([
+        api<DashboardStats>('/api/dashboard/stats'),
+        api<{ items: Patient[] }>('/api/patients')
+      ]);
+      setStats(statsData);
+      setPatients(patientsData.items);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch dashboard data:', err);
+      setError('Failed to load dashboard data. Please try again.');
+      toast.error('Connection Error', {
+        description: 'Could not connect to the medical database.'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
   return (
     <AppLayout container contentClassName="space-y-8">
       <div className="flex flex-col space-y-8 animate-fade-in">
@@ -60,10 +60,7 @@ export function HomePage() {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle className="relative top-0 right-0" />
-            <Button className="bg-teal-600 hover:bg-teal-700 text-white shadow-sm gap-2">
-              <Plus className="h-4 w-4" />
-              Admit Patient
-            </Button>
+            <AdmitPatientDialog onSuccess={fetchData} />
           </div>
         </header>
         {/* Stats Grid */}

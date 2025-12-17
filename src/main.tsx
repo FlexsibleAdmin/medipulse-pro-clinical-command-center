@@ -16,6 +16,7 @@ import { PatientDetailPage } from '@/pages/PatientDetailPage'
 import { SchedulePage } from '@/pages/SchedulePage'
 import { ReportsPage } from '@/pages/ReportsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { AlertsPage } from '@/pages/AlertsPage'
 const router = createBrowserRouter([
   {
     path: "/",
@@ -45,6 +46,11 @@ const router = createBrowserRouter([
   {
     path: "/settings",
     element: <SettingsPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/alerts",
+    element: <AlertsPage />,
     errorElement: <RouteErrorBoundary />,
   },
 ]);

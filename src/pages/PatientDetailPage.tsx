@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { VitalsHistoryChart } from '@/components/patient/VitalsHistoryChart';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, MoreVertical, Activity, Calendar, MapPin, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Activity, Calendar, MapPin, AlertTriangle, LogOut, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import type { Patient } from '@shared/types';
 import { toast } from 'sonner';
@@ -18,24 +18,43 @@ export function PatientDetailPage() {
   const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDischarging, setIsDischarging] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
+  const fetchPatient = useCallback(async () => {
     if (!id) return;
-    const fetchPatient = async () => {
-      try {
-        setIsLoading(true);
-        const data = await api<Patient>(`/api/patients/${id}`);
-        setPatient(data);
-      } catch (err) {
-        console.error('Failed to fetch patient:', err);
-        setError('Patient not found or access denied.');
-        toast.error('Could not load patient details');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchPatient();
+    try {
+      setIsLoading(true);
+      const data = await api<Patient>(`/api/patients/${id}`);
+      setPatient(data);
+    } catch (err) {
+      console.error('Failed to fetch patient:', err);
+      setError('Patient not found or access denied.');
+      toast.error('Could not load patient details');
+    } finally {
+      setIsLoading(false);
+    }
   }, [id]);
+  useEffect(() => {
+    fetchPatient();
+  }, [fetchPatient]);
+  const handleDischarge = async () => {
+    if (!patient) return;
+    if (!confirm(`Are you sure you want to discharge ${patient.name}?`)) return;
+    setIsDischarging(true);
+    try {
+      const updated = await api<Patient>(`/api/patients/${patient.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'Discharged' })
+      });
+      setPatient(updated);
+      toast.success('Patient discharged successfully');
+    } catch (err) {
+      console.error('Failed to discharge patient:', err);
+      toast.error('Failed to discharge patient');
+    } finally {
+      setIsDischarging(false);
+    }
+  };
   if (isLoading) {
     return (
       <AppLayout container>
@@ -81,7 +100,7 @@ export function PatientDetailPage() {
             <div className="space-y-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold tracking-tight">{patient.name}</h1>
-                <Badge variant={patient.status === 'Critical' ? 'destructive' : 'secondary'}>
+                <Badge variant={patient.status === 'Critical' ? 'destructive' : patient.status === 'Discharged' ? 'outline' : 'secondary'}>
                   {patient.status}
                 </Badge>
               </div>
@@ -103,7 +122,16 @@ export function PatientDetailPage() {
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline">Edit Details</Button>
-            <Button className="bg-teal-600 hover:bg-teal-700 text-white">Discharge</Button>
+            {patient.status !== 'Discharged' && (
+              <Button 
+                className="bg-teal-600 hover:bg-teal-700 text-white gap-2"
+                onClick={handleDischarge}
+                disabled={isDischarging}
+              >
+                {isDischarging ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+                Discharge
+              </Button>
+            )}
             <Button variant="ghost" size="icon">
               <MoreVertical className="h-4 w-4" />
             </Button>
