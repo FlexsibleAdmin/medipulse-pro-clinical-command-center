@@ -36,8 +36,7 @@ const generateHistoryData = () => {
 };
 export function VitalsHistoryChart({ patientId }: VitalsHistoryChartProps) {
   const [activeTab, setActiveTab] = useState("hr");
-  // Fixed: Removed patientId from dependency array as generateHistoryData is static
-  const data = useMemo(() => generateHistoryData(), []);
+  const data = useMemo(() => generateHistoryData(), [patientId]);
   const config = {
     hr: {
       color: "#E11D48", // rose-600
@@ -94,14 +93,14 @@ export function VitalsHistoryChart({ patientId }: VitalsHistoryChartProps) {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
-              <XAxis
-                dataKey="displayTime"
+              <XAxis 
+                dataKey="displayTime" 
                 tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
                 axisLine={false}
                 tickLine={false}
                 minTickGap={30}
               />
-              <YAxis
+              <YAxis 
                 domain={currentConfig.domain}
                 tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
                 axisLine={false}

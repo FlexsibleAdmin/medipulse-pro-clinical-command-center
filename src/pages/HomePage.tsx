@@ -6,14 +6,15 @@ import { VitalsChart } from '@/components/dashboard/VitalsChart';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Toaster, toast } from 'sonner';
-import { 
-  Users, 
-  AlertCircle, 
-  Calendar, 
-  Clock, 
-  Plus, 
+import {
+  Users,
+  AlertCircle,
+  Calendar,
+  Clock,
+  Plus,
   Search,
-  Filter
+  Filter,
+  FileText
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api-client';
@@ -109,9 +110,9 @@ export function HomePage() {
               <div className="flex items-center gap-2">
                 <div className="relative w-40 md:w-60">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search patients..." 
-                    className="pl-9 h-9 bg-background" 
+                  <Input
+                    placeholder="Search patients..."
+                    className="pl-9 h-9 bg-background"
                   />
                 </div>
                 <Button variant="outline" size="icon" className="h-9 w-9">

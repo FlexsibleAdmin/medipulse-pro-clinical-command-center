@@ -1,33 +1,32 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PatientTable } from '@/components/dashboard/PatientTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, Download } from 'lucide-react';
+import { Plus, Search, Filter, Download } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import type { Patient } from '@shared/types';
 import { toast } from 'sonner';
-import { AdmitPatientDialog } from '@/components/patient/AdmitPatientDialog';
 export function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const fetchPatients = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const data = await api<{ items: Patient[] }>('/api/patients');
-      setPatients(data.items);
-    } catch (err) {
-      console.error('Failed to fetch patients:', err);
-      toast.error('Failed to load patient roster');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
   useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setIsLoading(true);
+        const data = await api<{ items: Patient[] }>('/api/patients');
+        setPatients(data.items);
+      } catch (err) {
+        console.error('Failed to fetch patients:', err);
+        toast.error('Failed to load patient roster');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchPatients();
-  }, [fetchPatients]);
-  const filteredPatients = patients.filter(p =>
+  }, []);
+  const filteredPatients = patients.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -45,7 +44,10 @@ export function PatientsPage() {
             <Download className="h-4 w-4" />
             Export
           </Button>
-          <AdmitPatientDialog onSuccess={fetchPatients} />
+          <Button className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+            <Plus className="h-4 w-4" />
+            Admit Patient
+          </Button>
         </div>
       </div>
       <div className="flex items-center gap-2 py-4">

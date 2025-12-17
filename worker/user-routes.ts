@@ -13,6 +13,12 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const page = await PatientEntity.list(c.env, cq ?? null, lq ? Math.max(1, (Number(lq) | 0)) : undefined);
     return ok(c, page);
   });
+  app.get('/api/patients/:id', async (c) => {
+    const id = c.req.param('id');
+    const entity = new PatientEntity(c.env, id);
+    if (!await entity.exists()) return notFound(c, 'Patient not found');
+    return ok(c, await entity.getState());
+  });
   app.get('/api/dashboard/stats', async (c) => {
     // In a real app, this would aggregate from the index or a dedicated stats DO.
     // For this phase, we'll calculate live from the seeded list to ensure consistency.

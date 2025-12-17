@@ -10,14 +10,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MoreHorizontal, Activity, Clock } from "lucide-react";
+import { MoreHorizontal, Activity } from "lucide-react";
 import type { Patient } from "@shared/types";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 interface PatientTableProps {
   patients: Patient[];
   isLoading?: boolean;
 }
 export function PatientTable({ patients, isLoading }: PatientTableProps) {
+  const navigate = useNavigate();
   if (isLoading) {
     return (
       <div className="w-full space-y-4">
@@ -71,7 +73,11 @@ export function PatientTable({ patients, isLoading }: PatientTableProps) {
             </TableRow>
           ) : (
             patients.map((patient) => (
-              <TableRow key={patient.id} className="group cursor-pointer hover:bg-muted/30 transition-colors">
+              <TableRow 
+                key={patient.id} 
+                className="group cursor-pointer hover:bg-muted/30 transition-colors"
+                onClick={() => navigate(`/patients/${patient.id}`)}
+              >
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9 border border-border">
