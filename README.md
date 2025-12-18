@@ -1,6 +1,6 @@
 # MediPulse Pro - Clinical Command Center
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/FlexsibleAdmin/medipulse-pro-clinical-command-center)
 
 MediPulse Pro is a next-generation Electronic Health Record (EHR) and physician dashboard designed for speed, clarity, and visual elegance. It transforms the chaotic information flow of a medical practice into a streamlined, calm, and information-dense command center.
 
@@ -84,7 +84,7 @@ Open your browser to `http://localhost:3000` (or the port shown in your terminal
 
 ## Deployment
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/FlexsibleAdmin/medipulse-pro-clinical-command-center)
 
 You can deploy this application to Cloudflare Workers using Wrangler.
 
